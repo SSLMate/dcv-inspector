@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8"/>
+	<title>DCV Inspector - {{ .TestID }}</title>
+	<link rel="stylesheet" href="/assets/style.css"/>
+</head>
+<body>
+	<header>
+		<h1>DCV Inspector</h1>
+	</header>
+	{{ if .IsRunning }}
+		<section>
+			<p>
+				Your test domain is: <code>{{ .TestDomain }}</code>
+			</p>
+			<form action="/test/{{ .TestID }}" method="post">
+				<button type="submit" name="stop" value="stop">Stop Test</button>
+			</form>
+		</section>
+	{{ else }}
+		<section>
+			<h2>DNS Requests</h2>
+			<table>
+				<thead><tr><th>Time</th><th>Remote Address</th><th>Query Type</th><th>Query FQDN</th><th>Details</th></tr></thead>
+				{{ range .DNS }}
+					<tr>
+						<td>{{ .ReceivedAt.Format "2006-01-02 15:04:05 UTC" }}</td>
+						<td>{{ .RemoteAddr }}</td>
+						<td>{{ .QTypeString }}</td>
+						<td>{{ .FQDN }}</td>
+						<td><pre> {{ .MessageString }}</pre></td>
+					</tr>
+				{{ end }}
+			</table>
+		</section>
+		<section>
+			<h2>HTTP Requests</h2>
+			<table>
+				<thead><tr><th>Time</th><th>Remote Address</th><th>Host</th><th>HTTPS</th><th>Request</th><th>Details</th></tr></thead>
+				{{ range .HTTP }}
+					<tr>
+						<td>{{ .ReceivedAt.Format "2006-01-02 15:04:05 UTC" }}</td>
+						<td>{{ .RemoteAddr }}</td>
+						<td>{{ .Host }}</td>
+						<td>{{ .HTTPS }}</td>
+						<td>{{ .Method }} {{ .URL }} {{ .Proto }}</td>
+						<td><pre>{{ .HeaderString }}</pre></td>
+					</tr>
+				{{ end }}
+			</table>
+		</section>
+		<section>
+			<h2>SMTP Requests</h2>
+			<table>
+				<thead><tr><th>Time</th><th>Remote Address</th><th>HELO</th><th>STARTTLS</th><th>MAIL FROM</th><th>RCPT TO</th><th>Details</th></tr></thead>
+				{{ range .SMTP }}
+					<tr>
+						<td>{{ .ReceivedAt.Format "2006-01-02 15:04:05 UTC" }}</td>
+						<td>{{ .RemoteAddr }}</td>
+						<td>{{ .Helo }}</td>
+						<td>{{ .STARTTLS }}</td>
+						<td>{{ .MailFrom }}</td>
+						<td>
+							<ul>{{ range .RcptTo }}<li>{{ . }}</li>{{ end }}</ul>
+						</td>
+						<td><pre>{{ .MessageHeader }}</pre></td>
+					</tr>
+				{{ end }}
+			</table>
+		</section>
+		<section>
+			<form action="/test" method="post">
+				<button type="submit">Start New Test</button>
+			</form>
+		</section>
+	{{ end }}
+	<footer>
+		<p>
+			{{ if .BuildInfo }}
+				{{ .BuildInfo.Main.Path }}@{{ .BuildInfo.Main.Version }} ({{ .BuildInfo.Main.Sum }})
+			{{ end }}
+			<a href="https://github.com/SSLMate/dcv-inspector">Bug Reports, Feature Requests, Source Code</a>
+		</p>
+	</footer>
+</body>
+</html>
