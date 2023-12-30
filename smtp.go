@@ -122,7 +122,7 @@ func runSMTPServer(l net.Listener) {
 	server.Domain = domain
 	server.MaxRecipients = 20
 	server.MaxMessageBytes = 1 * 1024 * 1024
-	server.ReadTimeout = 50 * time.Second // TODO: reduce
+	server.ReadTimeout = 5 * time.Second
 	server.WriteTimeout = 15 * time.Second
 	server.EnableSMTPUTF8 = true
 	server.AuthDisabled = true
