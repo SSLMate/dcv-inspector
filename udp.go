@@ -8,6 +8,25 @@ import (
 	"strings"
 )
 
+func closeAllUDP(socks []net.PacketConn) {
+	for _, sock := range socks {
+		sock.Close()
+	}
+}
+
+func listenAllUDP(specs []string) ([]net.PacketConn, error) {
+	socks := []net.PacketConn{}
+	for _, spec := range specs {
+		sock, err := listenUDP(spec)
+		if err != nil {
+			closeAllUDP(socks)
+			return nil, fmt.Errorf("%s: %w", spec, err)
+		}
+		socks = append(socks, sock)
+	}
+	return socks, nil
+}
+
 func listenUDP(spec string) (net.PacketConn, error) {
 	if arg, ok := strings.CutPrefix(spec, "udp:"); ok {
 		return listenUDPPort(arg)
