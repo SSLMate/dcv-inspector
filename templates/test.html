@@ -6,19 +6,32 @@
 	<link rel="stylesheet" href="/assets/style.css"/>
 </head>
 <body>
-	<header>
-		<h1>DCV Inspector</h1>
-	</header>
 	{{ if .IsRunning }}
-		<section>
+		<header>
+			<h1>DCV Inspector Test In Progress</h1>
+		</header>
+		<section class="running_info">
 			<p>
-				Your test domain is: <code>{{ .TestDomain }}</code>
+				Your test domain is:
 			</p>
+			<p>
+				<code class="test_domain">{{ .TestDomain }}</code>
+			</p>
+			<p>
+				Try requesting a certificate for this domain, or one of its subdomains.
+				All DNS, HTTP, and SMTP requests will be recorded and presented to you after
+				the test is stopped.
+			</p>
+		</section>
+		<section>
 			<form action="/test/{{ .TestID }}" method="post">
-				<button type="submit" name="stop" value="stop">Stop Test</button>
+				<button type="submit" name="stop" value="stop" class="stop_button">Stop Test</button>
 			</form>
 		</section>
 	{{ else }}
+		<header>
+			<h1>DCV Inspector Test Results</h1>
+		</header>
 		<section>
 			<h2>DNS Requests</h2>
 			<table>
@@ -26,10 +39,16 @@
 				{{ range .DNS }}
 					<tr>
 						<td>{{ .ReceivedAt.Format "2006-01-02 15:04:05 UTC" }}</td>
-						<td>{{ .RemoteAddr }}</td>
+						<td><a href="https://bgp.tools/search?q={{ .RemoteIP }}">{{ .RemoteAddr }}</a></td>
 						<td>{{ .QTypeString }}</td>
 						<td>{{ .FQDN }}</td>
-						<td><pre> {{ .MessageString }}</pre></td>
+						<td>
+							<a href="javascript:void(0)" onclick="this.parentNode.querySelector('dialog').showModal()">Show</a>
+							<dialog>
+								<pre>{{ .MessageString }}</pre>
+								<form method="dialog"><button class="close_button">Close</button></form>
+							</dialog>
+						</td>
 					</tr>
 				{{ end }}
 			</table>
@@ -37,15 +56,21 @@
 		<section>
 			<h2>HTTP Requests</h2>
 			<table>
-				<thead><tr><th>Time</th><th>Remote Address</th><th>Host</th><th>HTTPS</th><th>Request</th><th>Details</th></tr></thead>
+				<thead><tr><th>Time</th><th>Remote Address</th><th>Host</th><th>HTTPS</th><th>Request</th><th>Header</th></tr></thead>
 				{{ range .HTTP }}
 					<tr>
 						<td>{{ .ReceivedAt.Format "2006-01-02 15:04:05 UTC" }}</td>
-						<td>{{ .RemoteAddr }}</td>
+						<td><a href="https://bgp.tools/search?q={{ .RemoteIP }}">{{ .RemoteAddr }}</a></td>
 						<td>{{ .Host }}</td>
-						<td>{{ .HTTPS }}</td>
+						<td>{{ .IsHTTPS }}</td>
 						<td>{{ .Method }} {{ .URL }} {{ .Proto }}</td>
-						<td><pre>{{ .HeaderString }}</pre></td>
+						<td>
+							<a href="javascript:void(0)" onclick="this.parentNode.querySelector('dialog').showModal()">Show</a>
+							<dialog>
+								<pre>{{ .HeaderString }}</pre>
+								<form method="dialog"><button class="close_button">Close</button></form>
+							</dialog>
+						</td>
 					</tr>
 				{{ end }}
 			</table>
@@ -53,25 +78,31 @@
 		<section>
 			<h2>SMTP Requests</h2>
 			<table>
-				<thead><tr><th>Time</th><th>Remote Address</th><th>HELO</th><th>STARTTLS</th><th>MAIL FROM</th><th>RCPT TO</th><th>Details</th></tr></thead>
+				<thead><tr><th>Time</th><th>Remote Address</th><th>HELO</th><th>STARTTLS</th><th>MAIL FROM</th><th>RCPT TO</th><th>Header</th></tr></thead>
 				{{ range .SMTP }}
 					<tr>
 						<td>{{ .ReceivedAt.Format "2006-01-02 15:04:05 UTC" }}</td>
-						<td>{{ .RemoteAddr }}</td>
+						<td><a href="https://bgp.tools/search?q={{ .RemoteIP }}">{{ .RemoteAddr }}</a></td>
 						<td>{{ .Helo }}</td>
-						<td>{{ .STARTTLS }}</td>
+						<td>{{ .IsSTARTTLS }}</td>
 						<td>{{ .MailFrom }}</td>
 						<td>
 							<ul>{{ range .RcptTo }}<li>{{ . }}</li>{{ end }}</ul>
 						</td>
-						<td><pre>{{ .MessageHeader }}</pre></td>
+						<td>
+							<a href="javascript:void(0)" onclick="this.parentNode.querySelector('dialog').showModal()">Show</a>
+							<dialog>
+								<pre>{{ .MessageHeader }}</pre>
+								<form method="dialog"><button class="close_button">Close</button></form>
+							</dialog>
+						</td>
 					</tr>
 				{{ end }}
 			</table>
 		</section>
 		<section>
 			<form action="/test" method="post">
-				<button type="submit">Start New Test</button>
+				<button type="submit" class="start_button">Start New Test</button>
 			</form>
 		</section>
 	{{ end }}
@@ -80,7 +111,7 @@
 			{{ if .BuildInfo }}
 				{{ .BuildInfo.Main.Path }}@{{ .BuildInfo.Main.Version }} ({{ .BuildInfo.Main.Sum }})
 			{{ end }}
-			<a href="https://github.com/SSLMate/dcv-inspector">Bug Reports, Feature Requests, Source Code</a>
+			<a href="https://github.com/SSLMate/dcv-inspector">Source Code / Issue Tracker</a>
 		</p>
 	</footer>
 </body>

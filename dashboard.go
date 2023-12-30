@@ -100,6 +100,8 @@ type httpItem struct {
 	HTTPS         bool                `sql:"https"`
 }
 
+func (i *httpItem) IsHTTPS() string { return boolString(i.HTTPS) }
+
 func (i *httpItem) RemoteAddr() string { return net.JoinHostPort(i.RemoteIP, i.RemotePort) }
 
 func (i *httpItem) HeaderString() string {
@@ -123,6 +125,8 @@ type smtpItem struct {
 	Data          []byte    `sql:"data"`
 	STARTTLS      bool      `sql:"starttls"`
 }
+
+func (i *smtpItem) IsSTARTTLS() string { return boolString(i.STARTTLS) }
 
 func (i *smtpItem) RemoteAddr() string { return net.JoinHostPort(i.RemoteIP, i.RemotePort) }
 
@@ -231,4 +235,12 @@ func serveTest(ctx context.Context, w http.ResponseWriter, r *http.Request, test
 	w.WriteHeader(http.StatusOK)
 	testTemplate.Execute(w, dashboard)
 	return nil
+}
+
+func boolString(v bool) string {
+	if v {
+		return "Yes"
+	} else {
+		return "No"
+	}
 }
