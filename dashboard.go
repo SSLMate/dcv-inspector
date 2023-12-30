@@ -18,6 +18,8 @@ import (
 	"src.agwa.name/go-dbutil"
 )
 
+const redirectDashboardToHTTPS = false // TODO: change to true
+
 //go:embed assets/* templates/*
 var content embed.FS
 
@@ -162,7 +164,7 @@ func parseTestPath(path string) (testID, bool) {
 }
 
 func serveDashboard(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	if false && r.TLS == nil { // TODO: redirect to HTTPS
+	if redirectDashboardToHTTPS && r.TLS == nil {
 		newURL := &url.URL{
 			Scheme:     "https",
 			Host:       r.Host,
