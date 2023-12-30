@@ -82,6 +82,8 @@ func main() {
 		db = ret
 	}
 
+	// TODO: initialize database schema if necessary
+
 	if flags.httpsCert == "" {
 		getHTTPSCertificate = cert.GetCertificateAutomatically([]string{domain})
 	} else {
