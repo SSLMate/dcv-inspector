@@ -24,32 +24,32 @@ var (
 
 func main() {
 	var flags struct {
-		domain        string
-		db            string
-		httpListener  []string
-		httpsListener []string
-		httpsCert     string
-		smtpListener  []string
-		dnsListener   []string
-		dnsUDP        []string
+		domain      string
+		db          string
+		httpListen  []string
+		httpsListen []string
+		httpsCert   string
+		smtpListen  []string
+		dnsListen   []string
+		dnsUDP      []string
 	}
 	flag.StringVar(&flags.domain, "domain", "", "Domain name")
 	flag.StringVar(&flags.db, "db", "", "Path to database file")
-	flag.Func("http-listener", "Socket for HTTP server to listen on (go-listener syntax; e.g. tcp:80)", func(arg string) error {
-		flags.httpListener = append(flags.httpListener, arg)
+	flag.Func("http-listen", "Socket for HTTP server to listen on (go-listener syntax; e.g. tcp:80)", func(arg string) error {
+		flags.httpListen = append(flags.httpListen, arg)
 		return nil
 	})
-	flag.Func("https-listener", "Socket for HTTPS server to listen on (go-listener syntax; e.g. tcp:443)", func(arg string) error {
-		flags.httpsListener = append(flags.httpsListener, arg)
+	flag.Func("https-listen", "Socket for HTTPS server to listen on (go-listener syntax; e.g. tcp:443)", func(arg string) error {
+		flags.httpsListen = append(flags.httpsListen, arg)
 		return nil
 	})
 	flag.StringVar(&flags.httpsCert, "https-cert", "", "HTTPS certificate (default: obtain automatically with ACME)")
-	flag.Func("smtp-listener", "Socket for SMTP server to listen on (go-listener syntax; e.g. tcp:25)", func(arg string) error {
-		flags.smtpListener = append(flags.smtpListener, arg)
+	flag.Func("smtp-listen", "Socket for SMTP server to listen on (go-listener syntax; e.g. tcp:25)", func(arg string) error {
+		flags.smtpListen = append(flags.smtpListen, arg)
 		return nil
 	})
-	flag.Func("dns-listener", "TCP socket for DNS server to listen on (go-listener syntax; e.g. tcp:53)", func(arg string) error {
-		flags.dnsListener = append(flags.dnsListener, arg)
+	flag.Func("dns-listen", "TCP socket for DNS server to listen on (go-listener syntax; e.g. tcp:53)", func(arg string) error {
+		flags.dnsListen = append(flags.dnsListen, arg)
 		return nil
 	})
 	flag.Func("dns-udp", "UDP socket for DNS server (udp:PORTNO or udp:IPADDR:PORTNO or fd:FILDESC)", func(arg string) error {
@@ -88,19 +88,19 @@ func main() {
 		getHTTPSCertificate = cert.GetCertificateFromFile(flags.httpsCert)
 	}
 
-	httpListeners, err := listener.OpenAll(flags.httpListener)
+	httpListeners, err := listener.OpenAll(flags.httpListen)
 	if err != nil {
 		log.Fatalf("error opening HTTP listeners: %s", err)
 	}
-	httpsListeners, err := listener.OpenAll(flags.httpsListener)
+	httpsListeners, err := listener.OpenAll(flags.httpsListen)
 	if err != nil {
 		log.Fatalf("error opening HTTPS listeners: %s", err)
 	}
-	smtpListeners, err := listener.OpenAll(flags.smtpListener)
+	smtpListeners, err := listener.OpenAll(flags.smtpListen)
 	if err != nil {
 		log.Fatalf("error opening SMTP listeners: %s", err)
 	}
-	dnsListeners, err := listener.OpenAll(flags.dnsListener)
+	dnsListeners, err := listener.OpenAll(flags.dnsListen)
 	if err != nil {
 		log.Fatalf("error opening DNS listeners: %s", err)
 	}
