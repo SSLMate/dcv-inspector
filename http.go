@@ -18,7 +18,7 @@ func getHTTPSConfig(hello *tls.ClientHelloInfo) (*tls.Config, error) {
 	if hello.ServerName == domain {
 		return &tls.Config{
 			GetCertificate: getHTTPSCertificate,
-			NextProtos:     []string{"h2", "http/1.1"},
+			NextProtos:     []string{"h2", "http/1.1", "acme-tls/1"},
 			MinVersion:     tls.VersionTLS13,
 		}, nil
 	} else if _, ok := parseHostname(hello.ServerName); ok && !strings.HasPrefix(hello.ServerName, "_") {
