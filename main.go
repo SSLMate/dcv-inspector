@@ -105,7 +105,7 @@ func main() {
 		log.Fatal("-db not specified")
 	}
 	if ret, err := sql.Open("sqlite3", fmt.Sprintf("file:%s?_busy_timeout=5000", url.PathEscape(flags.db))); err != nil {
-		log.Fatalf("error opening database: %w", err)
+		log.Fatalf("error opening database: %s", err)
 	} else {
 		db = ret
 	}
