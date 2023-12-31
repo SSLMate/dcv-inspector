@@ -2,7 +2,7 @@
 
 DCV Inspector helps you inspect the DNS, HTTP, and SMTP requests made by a certificate authority during domain validation. You can use it to detect violations of domain validation rules, such as the use of Delegated Third Parties.
 
-DCV Inspector creates a unique subdomain for each test. All DNS, HTTP, and SMTP requests to this subdomain (including descendants of the subdomain) are recorded and presented to you for inspection.
+DCV Inspector creates a unique subdomain for each test. All DNS queries, HTTP requests, and emails to this subdomain (including descendants of the subdomain) are recorded and presented to you for inspection.
 
 To use DCV inspector, visit the official instance at https://dcv-inspector.com
 
