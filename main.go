@@ -35,8 +35,11 @@ import (
 	"net"
 	"net/netip"
 	"net/url"
+	"src.agwa.name/go-dbutil/dbschema"
 	"src.agwa.name/go-listener"
 	"src.agwa.name/go-listener/cert"
+
+	"software.sslmate.com/src/dcv-inspector/schema"
 )
 
 var (
@@ -107,7 +110,9 @@ func main() {
 		db = ret
 	}
 
-	// TODO: initialize database schema if necessary
+	if err := dbschema.Build(context.Background(), db, schema.Files); err != nil {
+		log.Fatalf("error building database schema: %s", err)
+	}
 
 	if flags.httpsCert == "" {
 		getHTTPSCertificate = cert.GetCertificateAutomatically([]string{domain})
