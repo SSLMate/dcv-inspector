@@ -47,15 +47,31 @@ func generateTestID() testID {
 	return id
 }
 
-func parseHostname(hostname string) (testID, bool) {
+func makeHostname(testID testID, subdomain string) string {
+	if subdomain == "" {
+		return testID.String() + ".test." + domain
+	} else {
+		return subdomain + "." + testID.String() + ".test." + domain
+	}
+}
+
+func parseHostname(hostname string) (testID, string, bool) {
 	hostname = strings.TrimSuffix(hostname, ".")
 	prefix, found := strings.CutSuffix(hostname, ".test."+domain)
 	if !found {
-		return testID{}, false
+		return testID{}, "", false
 	}
 	lastDot := strings.LastIndexByte(prefix, '.')
-	testIDStr := prefix[lastDot+1:]
-	return parseTestID(testIDStr)
+	id, ok := parseTestID(prefix[lastDot+1:])
+	if !ok {
+		return testID{}, "", false
+	}
+	if lastDot == -1 {
+		return id, "", true
+	} else {
+		subdomain := strings.ToLower(prefix[:lastDot])
+		return id, subdomain, true
+	}
 }
 
 func parseTestID(testIDStr string) (testID, bool) {

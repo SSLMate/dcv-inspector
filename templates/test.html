@@ -1,3 +1,87 @@
+{{ define "dns_records" }}
+	<table>
+		<thead><tr><th>Subdomain</th><th>Type</th><th>Data</th>{{ if $.IsRunning }}<th></th>{{ end }}</tr></thead>
+		{{ range $.DNSRecords }}
+			<tr>
+				<td>{{ .Subdomain }}</td>
+				<td>{{ .TypeString }}</td>
+				<td>
+					{{ if eq .TypeString "TXT" }}"{{ index .Data "Txt" 0 }}"{{ end }}
+					{{ if eq .TypeString "CAA" }}{{ index .Data "Flag" }} {{ index .Data "Tag" }} "{{ index .Data "Value" }}"{{ end }}
+				</td>
+				{{ if $.IsRunning }}
+					<td>
+						<form action="/test/{{ $.TestID }}" method="post">
+							<button type="submit" name="rm_dns_record" value="{{ .DNSRecordID }}">Delete</button>
+						</form>
+					</td>
+				{{ end }}
+			</tr>
+		{{ end }}
+		{{ if $.IsRunning }}
+			<tr>
+				<td><input form="add_txt_record_form" type="text" name="txt_subdomain" size="40"/></td>
+				<td>TXT</td>
+				<td>"<input form="add_txt_record_form" type="text" name="txt_data" size="50"/>"</td>
+				<td>
+					<form id="add_txt_record_form" action="/test/{{ $.TestID }}" method="post">
+						<input type="hidden" name="add_dns_record" value="TXT"/>
+						<button type="submit">Add TXT Record</button>
+					</form>
+				</td>
+			</tr>
+			<tr>
+				<td><input form="add_caa_record_form" type="text" name="caa_subdomain" size="40"/></td>
+				<td>CAA</td>
+				<td>
+					<input form="add_caa_record_form" type="text" name="caa_flag" size="4" placeholder="Flag" required="required"/>
+					<input form="add_caa_record_form" type="text" name="caa_tag" size="10" placeholder="Tag" required="required"/>
+					"<input form="add_caa_record_form" type="text" name="caa_value" size="30" placeholder="Value"/>"
+				</td>
+				<td>
+					<form id="add_caa_record_form" action="/test/{{ $.TestID }}" method="post">
+						<input type="hidden" name="add_dns_record" value="CAA"/>
+						<button type="submit">Add CAA Record</button>
+					</form>
+				</td>
+			</tr>
+		{{ end }}
+	</table>
+{{ end -}}
+{{ define "http_files" }}
+	<table>
+		<thead><tr><th>Scheme</th><th>Subdomain</th><th>Path</th><th>Content</th>{{ if $.IsRunning }}<th></th>{{ end }}</tr></thead>
+		{{ range $.HTTPFiles }}
+			<tr>
+				<td>{{ .Scheme }}</td>
+				<td>{{ .Subdomain }}</td>
+				<td>{{ .Path }}</td>
+				<td><textarea readonly="readonly" rows="2" cols="50">{{ .Content }}</textarea></td>
+				{{ if $.IsRunning }}
+					<td>
+						<form action="/test/{{ $.TestID }}" method="post">
+							<button type="submit" name="rm_http_file" value="{{ .HTTPFileID }}">Delete</button>
+						</form>
+					</td>
+				{{ end }}
+			</tr>
+		{{ end }}
+		{{ if $.IsRunning }}
+			<tr>
+				<td><select form="add_http_file_form" name="file_scheme"><option>http</option><option>https</option></select></td>
+				<td><input form="add_http_file_form" type="text" name="file_subdomain" size="30"/></td>
+				<td><input form="add_http_file_form" type="text" name="file_path" size="45"/></td>
+				<td><textarea form="add_http_file_form" name="file_content" rows="3" cols="45"></textarea></td>
+				<td>
+					<form id="add_http_file_form" action="/test/{{ $.TestID }}" method="post">
+						<input type="hidden" name="add_http_file" value="1"/>
+						<button type="submit">Add File</button>
+					</form>
+				</td>
+			</tr>
+		{{ end }}
+	</table>
+{{ end -}}
 <!DOCTYPE html>
 <html lang="en">
 <!--
@@ -50,14 +134,26 @@
 			</p>
 		</section>
 		<section>
+			<h2>DNS Records</h2>
+			{{ template "dns_records" $ }}
+		</section>
+		<section>
+			<h2>HTTP Files</h2>
+			{{ template "http_files" $ }}
+		</section>
+		<section>
 			<form action="/test/{{ .TestID }}" method="post">
-				<button type="submit" name="stop" value="stop" class="stop_button">Stop Test</button>
+				<button type="submit" name="stop" value="stop" class="big_button stop_button">Stop Test</button>
 			</form>
 		</section>
 	{{ else }}
 		<header>
 			<h1>DCV Inspector Test Results</h1>
 		</header>
+		<section>
+			<h2>DNS Records</h2>
+			{{ template "dns_records" $ }}
+		</section>
 		<section>
 			<h2>DNS Requests</h2>
 			<table>
@@ -72,12 +168,16 @@
 							<a href="javascript:void(0)" onclick="this.parentNode.querySelector('dialog').showModal()">Show</a>
 							<dialog>
 								<pre>{{ .MessageString }}</pre>
-								<form method="dialog"><button class="close_button">Close</button></form>
+								<form method="dialog"><button class="big_button close_button">Close</button></form>
 							</dialog>
 						</td>
 					</tr>
 				{{ end }}
 			</table>
+		</section>
+		<section>
+			<h2>HTTP Files</h2>
+			{{ template "http_files" $ }}
 		</section>
 		<section>
 			<h2>HTTP Requests</h2>
@@ -94,7 +194,7 @@
 							<a href="javascript:void(0)" onclick="this.parentNode.querySelector('dialog').showModal()">Show</a>
 							<dialog>
 								<pre>{{ .HeaderString }}</pre>
-								<form method="dialog"><button class="close_button">Close</button></form>
+								<form method="dialog"><button class="big_button close_button">Close</button></form>
 							</dialog>
 						</td>
 					</tr>
@@ -119,7 +219,7 @@
 							<a href="javascript:void(0)" onclick="this.parentNode.querySelector('dialog').showModal()">Show</a>
 							<dialog>
 								<pre>{{ .MessageHeader }}</pre>
-								<form method="dialog"><button class="close_button">Close</button></form>
+								<form method="dialog"><button class="big_button close_button">Close</button></form>
 							</dialog>
 						</td>
 					</tr>
@@ -128,7 +228,7 @@
 		</section>
 		<section>
 			<form action="/test" method="post">
-				<button type="submit" class="start_button">Start New Test</button>
+				<button type="submit" class="big_button start_button">Start New Test</button>
 			</form>
 		</section>
 	{{ end }}

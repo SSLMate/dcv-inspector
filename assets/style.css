@@ -72,7 +72,7 @@ footer {
 	margin-top: 5rem;
 	color: #333;
 }
-button {
+.big_button {
 	display: inline-block;
 	padding: 0.6em 1.2em;
 	font-size: 130%;
@@ -84,10 +84,10 @@ button {
 	border-radius: 5px;
 	transition: opacity 0.3s ease-in-out;
 }
-button:hover {
+.big_button:hover {
 	opacity: 0.8;
 }
-button:focus {
+.big_button:focus {
 	outline: none;
 }
 .start_button {

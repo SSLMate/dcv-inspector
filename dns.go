@@ -27,11 +27,13 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/miekg/dns"
 	"log"
 	"net"
 	"net/netip"
+	"src.agwa.name/go-dbutil"
 	"strings"
 )
 
@@ -65,7 +67,7 @@ func serveDNS(w dns.ResponseWriter, req *dns.Msg) {
 		if qtype == dns.TypeSOA || qtype == dns.TypeANY {
 			answers = append(answers, makeSOA())
 		}
-	} else if testID, ok := parseHostname(fqdn); ok {
+	} else if testID, subdomain, ok := parseHostname(fqdn); ok {
 		if !strings.HasPrefix(fqdn, "_") {
 			answers = []dns.RR{}
 			if qtype == dns.TypeA || qtype == dns.TypeANY {
@@ -92,6 +94,9 @@ func serveDNS(w dns.ResponseWriter, req *dns.Msg) {
 				})
 			}
 		}
+		if err := lookupDNSRecords(context.Background(), testID, subdomain, qtype, &answers); err != nil {
+			log.Printf("error looking up DNS records: %s", err)
+		}
 		if err := recordDNSRequest(context.Background(), testID, w.RemoteAddr(), req); err != nil {
 			log.Printf("error recording DNS request: %s", err)
 		}
@@ -109,6 +114,38 @@ func serveDNS(w dns.ResponseWriter, req *dns.Msg) {
 		resp.Ns = []dns.RR{makeSOA()}
 	}
 	w.WriteMsg(resp)
+}
+
+func lookupDNSRecords(ctx context.Context, testID testID, subdomain string, qtype uint16, rrs *[]dns.RR) error {
+	var rows []struct {
+		Type     uint16 `sql:"type"`
+		DataJSON string `sql:"data_json"`
+	}
+	if qtype == dns.TypeANY {
+		if err := dbutil.QueryAll(ctx, db, &rows, `SELECT type, data_json FROM dns_record WHERE test_id = ? AND subdomain = ? ORDER BY dns_record_id`, testID[:], subdomain); err != nil {
+			return fmt.Errorf("error querying dns_record row: %w", err)
+		}
+	} else {
+		if err := dbutil.QueryAll(ctx, db, &rows, `SELECT type, data_json FROM dns_record WHERE test_id = ? AND subdomain = ? AND type = ? ORDER BY dns_record_id`, testID[:], subdomain, qtype); err != nil {
+			return fmt.Errorf("error querying dns_record row: %w", err)
+		}
+	}
+	for _, row := range rows {
+		makeRR := dns.TypeToRR[row.Type]
+		if makeRR == nil {
+			return fmt.Errorf("dns_record row contains unknown DNS record type %d", row.Type)
+		}
+		rr := makeRR()
+		rr.Header().Name = makeHostname(testID, subdomain) + "."
+		rr.Header().Rrtype = row.Type
+		rr.Header().Class = dns.ClassINET
+		rr.Header().Ttl = 15
+		if err := json.Unmarshal([]byte(row.DataJSON), &rr); err != nil {
+			return fmt.Errorf("dns_record row contains bad JSON in the data column: %w", err)
+		}
+		*rrs = append(*rrs, rr)
+	}
+	return nil
 }
 
 func recordDNSRequest(ctx context.Context, testID testID, remoteAddr net.Addr, req *dns.Msg) error {

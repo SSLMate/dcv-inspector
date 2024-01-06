@@ -134,5 +134,6 @@ func parseEmailAddress(addr string) (testID, bool) {
 	if at == -1 {
 		return testID{}, false
 	}
-	return parseHostname(addr[at+1:])
+	id, _, ok := parseHostname(addr[at+1:])
+	return id, ok
 }

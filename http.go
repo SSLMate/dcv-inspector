@@ -28,6 +28,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"database/sql"
 	"fmt"
 	"log"
 	"net"
@@ -46,7 +47,7 @@ func getHTTPSConfig(hello *tls.ClientHelloInfo) (*tls.Config, error) {
 			NextProtos:     []string{"h2", "http/1.1", "acme-tls/1"},
 			MinVersion:     tls.VersionTLS13,
 		}, nil
-	} else if _, ok := parseHostname(hello.ServerName); ok && !strings.HasPrefix(hello.ServerName, "_") {
+	} else if _, _, ok := parseHostname(hello.ServerName); ok && !strings.HasPrefix(hello.ServerName, "_") {
 		return &tls.Config{
 			GetCertificate: getSelfSignedCert,
 			NextProtos:     []string{"h2", "http/1.1"},
@@ -73,8 +74,8 @@ func serveHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if host == domain {
 		err = serveDashboard(ctx, w, r)
-	} else if testID, ok := parseHostname(host); ok && !strings.HasPrefix(host, "_") {
-		err = serveTestHTTP(ctx, testID, w, r)
+	} else if testID, subdomain, ok := parseHostname(host); ok && !strings.HasPrefix(host, "_") {
+		err = serveTestHTTP(ctx, testID, subdomain, w, r)
 	} else {
 		http.Error(w, fmt.Sprintf("unrecognized host name %q", host), 404)
 	}
@@ -84,7 +85,15 @@ func serveHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func serveTestHTTP(ctx context.Context, testID testID, w http.ResponseWriter, r *http.Request) error {
+func requestScheme(r *http.Request) string {
+	if r.TLS == nil {
+		return "http"
+	} else {
+		return "https"
+	}
+}
+
+func serveTestHTTP(ctx context.Context, testID testID, subdomain string, w http.ResponseWriter, r *http.Request) error {
 	remoteAddr, err := netip.ParseAddrPort(r.RemoteAddr)
 	if err != nil {
 		http.Error(w, "error parsing remote address: "+err.Error(), 400)
@@ -98,11 +107,19 @@ func serveTestHTTP(ctx context.Context, testID testID, w http.ResponseWriter, r 
 		return nil
 	}
 
+	var content string
+	if err := db.QueryRowContext(ctx, `SELECT content FROM http_file WHERE test_id = ? AND scheme = ? AND subdomain = ? AND path = ?`, testID[:], requestScheme(r), subdomain, r.URL.Path).Scan(&content); err != nil && err != sql.ErrNoRows {
+		return fmt.Errorf("serveTestHTTP: error querying http_file row: %w", err)
+	}
+
 	if _, err := db.ExecContext(ctx, `INSERT INTO http_request (test_id, remote_ip, remote_port, host, method, url, proto, header_json, https) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, testID[:], remoteAddr.Addr().String(), remoteAddr.Port(), r.Host, r.Method, r.URL.String(), r.Proto, dbutil.JSON(r.Header), r.TLS != nil); err != nil {
 		return fmt.Errorf("serveTestHTTP: error inserting http_request for test %x: %w", testID, err)
 	}
 
-	http.Error(w, "OK", 200)
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(content))
 	return nil
 }
 
