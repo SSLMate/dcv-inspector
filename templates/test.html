@@ -58,6 +58,7 @@
 		<h2>DNS Records</h2>
 		<table>
 			<thead><tr><th>Subdomain</th><th>Type</th><th>Data</th>{{ if $.IsRunning }}<th></th>{{ end }}</tr></thead>
+			<tbody>
 			{{ range $.DNSRecords }}
 				<tr>
 					<td>{{ .Subdomain }}</td>
@@ -103,12 +104,14 @@
 					</td>
 				</tr>
 			{{ end }}
+			</tbody>
 		</table>
 	</section>
 	<section>
 		<h2>HTTP Files</h2>
 		<table>
 			<thead><tr><th>Scheme</th><th>Subdomain</th><th>Path</th><th>Content</th>{{ if $.IsRunning }}<th></th>{{ end }}</tr></thead>
+			<tbody>
 			{{ range $.HTTPFiles }}
 				<tr>
 					<td>{{ .Scheme }}</td>
@@ -138,6 +141,7 @@
 					</td>
 				</tr>
 			{{ end }}
+			</tbody>
 		</table>
 	</section>
 	{{ if .IsRunning }}
@@ -151,6 +155,7 @@
 			<h2>DNS Requests</h2>
 			<table>
 				<thead><tr><th>Time</th><th>Remote Address</th><th>Query Type</th><th>Query FQDN</th><th>Details</th></tr></thead>
+				<tbody>
 				{{ range .DNS }}
 					<tr>
 						<td>{{ .ReceivedAt.Format "2006-01-02 15:04:05 UTC" }}</td>
@@ -166,12 +171,14 @@
 						</td>
 					</tr>
 				{{ end }}
+				</tbody>
 			</table>
 		</section>
 		<section>
 			<h2>HTTP Requests</h2>
 			<table>
 				<thead><tr><th>Time</th><th>Remote Address</th><th>Host</th><th>HTTPS</th><th>Request</th><th>Header</th></tr></thead>
+				<tbody>
 				{{ range .HTTP }}
 					<tr>
 						<td>{{ .ReceivedAt.Format "2006-01-02 15:04:05 UTC" }}</td>
@@ -188,12 +195,14 @@
 						</td>
 					</tr>
 				{{ end }}
+				</tbody>
 			</table>
 		</section>
 		<section>
 			<h2>SMTP Requests</h2>
 			<table>
 				<thead><tr><th>Time</th><th>Remote Address</th><th>HELO</th><th>STARTTLS</th><th>MAIL FROM</th><th>RCPT TO</th><th>Header</th></tr></thead>
+				<tbody>
 				{{ range .SMTP }}
 					<tr>
 						<td>{{ .ReceivedAt.Format "2006-01-02 15:04:05 UTC" }}</td>
@@ -213,6 +222,7 @@
 						</td>
 					</tr>
 				{{ end }}
+				</tbody>
 			</table>
 		</section>
 		<section>
