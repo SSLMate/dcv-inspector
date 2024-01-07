@@ -38,6 +38,7 @@ import (
 	"src.agwa.name/go-dbutil/dbschema"
 	"src.agwa.name/go-listener"
 	"src.agwa.name/go-listener/cert"
+	"time"
 
 	"software.sslmate.com/src/dcv-inspector/schema"
 )
@@ -141,6 +142,8 @@ func main() {
 		log.Fatalf("error opening DNS UDP sockets: %s", err)
 	}
 
+	go cleanupTestsPeriodically()
+
 	for _, l := range httpListeners {
 		l := l
 		go runHTTPServer(l)
@@ -163,4 +166,20 @@ func main() {
 	}
 
 	select {}
+}
+
+func cleanupTestsPeriodically() {
+	ticker := time.NewTicker(time.Hour)
+	defer ticker.Stop()
+	for {
+		if err := cleanupTests(); err != nil {
+			log.Printf("error cleaning up tests: %s", err)
+		}
+		<-ticker.C
+	}
+}
+
+func cleanupTests() error {
+	_, err := db.Exec(`UPDATE test SET stopped_at = CURRENT_TIMESTAMP WHERE stopped_at IS NULL AND started_at < ?`, time.Now().Add(-6*time.Hour))
+	return err
 }
