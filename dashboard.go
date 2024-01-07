@@ -30,6 +30,7 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"encoding/base64"
 	"fmt"
 	"github.com/mattn/go-sqlite3"
 	"html/template"
@@ -251,6 +252,8 @@ func serveDashboard(ctx context.Context, w http.ResponseWriter, r *http.Request)
 		return startTest(ctx, w, r)
 	} else if testID, ok := parseTestPath(r.URL.Path); ok {
 		return serveTest(ctx, w, r, testID)
+	} else if r.URL.Path == "/view_issuance" {
+		return viewIssuance(ctx, w, r)
 	} else {
 		http.Error(w, "Unrecognized path", 400)
 		return nil
@@ -369,6 +372,22 @@ func serveTest(ctx context.Context, w http.ResponseWriter, r *http.Request, test
 		http.Redirect(w, r, "/test/"+testID.String(), http.StatusSeeOther)
 		return nil
 	}
+	if r.FormValue("ctsearch") != "" {
+		resp, err := ctsearch(ctx, "issuances", url.Values{
+			"domain":             {makeHostname(testID, "")},
+			"include_subdomains": {"true"},
+			"expand":             {"dns_names", "issuer.operator"},
+			"after":              {r.FormValue("ctsearch_after")},
+		})
+		if err != nil {
+			return err
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+		return nil
+	}
 	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("X-Xss-Protection", "0")
@@ -388,4 +407,15 @@ func boolString(v bool) string {
 func isUniqueViolation(err error) bool {
 	sqliteErr, ok := err.(sqlite3.Error)
 	return ok && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique
+}
+
+func viewIssuance(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	issuanceID := r.FormValue("id")
+	certDER, err := ctsearch(ctx, "issuances/"+url.PathEscape(issuanceID+".der"), nil)
+	if err != nil {
+		return err
+	}
+	w.Header().Set("Cache-Control", "public, max-age=3600, must-revalidate")
+	http.Redirect(w, r, "https://x509.io/?"+url.Values{"cert": {base64.StdEncoding.EncodeToString(certDER)}}.Encode(), http.StatusSeeOther)
+	return nil
 }

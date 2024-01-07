@@ -30,8 +30,9 @@
 	<meta charset="UTF-8"/>
 	<title>DCV Inspector - {{ .TestID }}</title>
 	<link rel="stylesheet" href="/assets/style.css"/>
+	<script src="/assets/ctsearch.js"></script>
 </head>
-<body>
+<body data-test-id="{{ .TestID }}">
 	{{ if .IsRunning }}
 		<header>
 			<h1>DCV Inspector Test In Progress</h1>
@@ -224,6 +225,20 @@
 				{{ end }}
 				</tbody>
 			</table>
+		</section>
+		<section>
+			<h2>Certificates</h2>
+			<table>
+				<thead><tr><th>ID</th><th>Issuer</th><th>DNS Names</th><th>Status</th><th></th></tr></thead>
+				<tbody id="ctsearch_results">
+					<tr>
+						<td colspan="5" style="text-align:center">
+							<button onclick="ctsearch()">Search Certificate Transparency</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<p style="margin-top:0.5em">Powered by <a href="https://sslmate.com/ct_search_api/">SSLMate's Certificate Transparency Search API</a></p>
 		</section>
 		<section>
 			<form action="/test" method="post">
