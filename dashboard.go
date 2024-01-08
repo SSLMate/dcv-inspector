@@ -253,7 +253,7 @@ func serveDashboard(ctx context.Context, w http.ResponseWriter, r *http.Request)
 	} else if testID, ok := parseTestPath(r.URL.Path); ok {
 		return serveTest(ctx, w, r, testID)
 	} else if r.URL.Path == "/view_issuance" {
-		return viewIssuance(ctx, w, r)
+		return serveViewIssuance(ctx, w, r)
 	} else {
 		http.Error(w, "Unrecognized path", 400)
 		return nil
@@ -409,7 +409,7 @@ func isUniqueViolation(err error) bool {
 	return ok && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique
 }
 
-func viewIssuance(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+func serveViewIssuance(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	issuanceID := r.FormValue("id")
 	certDER, err := ctsearch(ctx, "issuances/"+url.PathEscape(issuanceID+".der"), nil)
 	if err != nil {
