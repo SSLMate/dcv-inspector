@@ -2,6 +2,8 @@ github.com/emersion/go-sasl v0.0.0-20200509203442-7bfe0ed36a21 h1:OJyUGMJTzHTd1X
 github.com/emersion/go-sasl v0.0.0-20200509203442-7bfe0ed36a21/go.mod h1:iL2twTeMvZnrg54ZoPDNfJaJaqy0xIQFuBdrLsmspwQ=
 github.com/emersion/go-smtp v0.20.0 h1:eTD2iPzYKRrFF+NDHPwKgsBt5ZmB2jO6P2rP2LlVYWI=
 github.com/emersion/go-smtp v0.20.0/go.mod h1:qm27SGYgoIPRot6ubfQ/GpiPy/g3PaZAVRxiO/sDUgQ=
+github.com/kentik/patricia v1.2.1 h1:+ZyPXnEiFLbmT1yZR0JRfRUuNXmxROXdzI8YiSpTx5w=
+github.com/kentik/patricia v1.2.1/go.mod h1:6jY40ESetsbfi04/S12iJlsiS6DYL2B2W+WAcqoDHtw=
 github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
 github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
 github.com/mattn/go-sqlite3 v1.14.10 h1:MLn+5bFRlWMGoSRmJour3CL1w/qL96mvipqpwQW/Sfk=

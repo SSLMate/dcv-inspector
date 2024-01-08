@@ -12,6 +12,7 @@ require (
 
 require (
 	github.com/emersion/go-sasl v0.0.0-20200509203442-7bfe0ed36a21 // indirect
+	github.com/kentik/patricia v1.2.1 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect

@@ -97,6 +97,8 @@ type dnsItem struct {
 	Bytes        []byte    `sql:"bytes"`
 }
 
+func (i *dnsItem) AutonomousSystems() []autonomousSystem { return getAutonomousSystems(i.RemoteIP) }
+
 func (i *dnsItem) RemoteAddr() string { return net.JoinHostPort(i.RemoteIP, i.RemotePort) }
 
 func (i *dnsItem) QTypeString() string {
@@ -149,6 +151,8 @@ type httpItem struct {
 
 func (i *httpItem) IsHTTPS() string { return boolString(i.HTTPS) }
 
+func (i *httpItem) AutonomousSystems() []autonomousSystem { return getAutonomousSystems(i.RemoteIP) }
+
 func (i *httpItem) RemoteAddr() string { return net.JoinHostPort(i.RemoteIP, i.RemotePort) }
 
 func (i *httpItem) HeaderString() string {
@@ -184,6 +188,8 @@ type smtpItem struct {
 }
 
 func (i *smtpItem) IsSTARTTLS() string { return boolString(i.STARTTLS) }
+
+func (i *smtpItem) AutonomousSystems() []autonomousSystem { return getAutonomousSystems(i.RemoteIP) }
 
 func (i *smtpItem) RemoteAddr() string { return net.JoinHostPort(i.RemoteIP, i.RemotePort) }
 

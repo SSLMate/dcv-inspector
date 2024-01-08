@@ -151,6 +151,8 @@ func main() {
 	}
 
 	go cleanupTestsPeriodically()
+	go refreshPrefixesPeriodically()
+	go refreshASNamesPeriodically()
 
 	for _, l := range httpListeners {
 		l := l
