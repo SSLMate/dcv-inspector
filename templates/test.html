@@ -162,7 +162,7 @@
 					<tr>
 						<td>{{ .ReceivedAt.Format "2006-01-02 15:04:05 UTC" }}</td>
 						<td><a href="https://bgp.tools/search?q={{ .RemoteIP }}">{{ .RemoteAddr }}</a></td>
-						<td><ul>{{ range .AutonomousSystems }}<li><a href="https://bgp.tools/as/{{ .Number }}">{{ .String }}</a></li>{{ end }}</ul></td>
+						<td><ul>{{ range .AutonomousSystems }}<li>{{ .HTML }}</li>{{ end }}</ul></td>
 						<td>{{ .QTypeString }}</td>
 						<td>{{ .FQDN }}</td>
 						<td>
@@ -186,7 +186,7 @@
 					<tr>
 						<td>{{ .ReceivedAt.Format "2006-01-02 15:04:05 UTC" }}</td>
 						<td><a href="https://bgp.tools/search?q={{ .RemoteIP }}">{{ .RemoteAddr }}</a></td>
-						<td><ul>{{ range .AutonomousSystems }}<li><a href="https://bgp.tools/as/{{ .Number }}">{{ .String }}</a></li>{{ end }}</ul></td>
+						<td><ul>{{ range .AutonomousSystems }}<li>{{ .HTML }}</li>{{ end }}</ul></td>
 						<td>{{ .Host }}</td>
 						<td>{{ .IsHTTPS }}</td>
 						<td>{{ .Method }} {{ .URL }} {{ .Proto }}</td>
@@ -211,7 +211,7 @@
 					<tr>
 						<td>{{ .ReceivedAt.Format "2006-01-02 15:04:05 UTC" }}</td>
 						<td><a href="https://bgp.tools/search?q={{ .RemoteIP }}">{{ .RemoteAddr }}</a></td>
-						<td><ul>{{ range .AutonomousSystems }}<li><a href="https://bgp.tools/as/{{ .Number }}">{{ .String }}</a></li>{{ end }}</ul></td>
+						<td><ul>{{ range .AutonomousSystems }}<li>{{ .HTML }}</li>{{ end }}</ul></td>
 						<td>{{ .Helo }}</td>
 						<td>{{ .IsSTARTTLS }}</td>
 						<td>{{ .MailFrom }}</td>

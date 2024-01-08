@@ -30,6 +30,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io"
 	"log"
 	"net/http"
@@ -58,6 +59,14 @@ func (as *autonomousSystem) String() string {
 		str += fmt.Sprintf(" (%s)", as.Name)
 	}
 	return str
+}
+
+func (as *autonomousSystem) HTML() template.HTML {
+	str := fmt.Sprintf(`<a href="https://bgp.tools/as/%d">AS%d</a>`, as.Number, as.Number)
+	if as.Name != "" {
+		str += fmt.Sprintf(" (%s)", template.HTMLEscapeString(as.Name))
+	}
+	return template.HTML(str)
 }
 
 var bgpData struct {
