@@ -32,17 +32,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"runtime/debug"
 	"time"
 )
-
-var ctsearchUserAgent = func() string {
-	if info, _ := debug.ReadBuildInfo(); info != nil {
-		return info.Main.Path + "/" + info.Main.Version
-	} else {
-		return "dcv-inspector"
-	}
-}()
 
 var ctsearchClient = &http.Client{
 	Timeout: 30 * time.Second,
@@ -59,7 +50,7 @@ func ctsearch(ctx context.Context, path string, query url.Values) ([]byte, error
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", ctsearchUserAgent)
+	req.Header.Set("User-Agent", userAgentString)
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 	resp, err := ctsearchClient.Do(req)
 	if err != nil {

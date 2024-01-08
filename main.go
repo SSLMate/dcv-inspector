@@ -35,6 +35,7 @@ import (
 	"net"
 	"net/netip"
 	"net/url"
+	"runtime/debug"
 	"src.agwa.name/go-dbutil/dbschema"
 	"src.agwa.name/go-listener"
 	"src.agwa.name/go-listener/cert"
@@ -49,6 +50,7 @@ var (
 	v6address           []netip.Addr
 	db                  *sql.DB
 	getHTTPSCertificate cert.GetCertificateFunc
+	userAgentString     string
 )
 
 func main() {
@@ -101,6 +103,12 @@ func main() {
 	} else {
 		v6address = addr
 	}
+
+	userAgentString = "DCV Inspector"
+	if info, _ := debug.ReadBuildInfo(); info != nil {
+		userAgentString += " (" + info.Main.Path + "@" + info.Main.Version + ")"
+	}
+	userAgentString += " running on " + domain
 
 	if flags.db == "" {
 		log.Fatal("-db not specified")
