@@ -185,7 +185,7 @@ func makeSOA() *dns.SOA {
 		Refresh: 86400,
 		Retry:   86400,
 		Expire:  86400,
-		Minttl:  86400,
+		Minttl:  15,
 	}
 }
 
