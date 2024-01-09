@@ -94,11 +94,15 @@ func serveDNS(w dns.ResponseWriter, req *dns.Msg) {
 				})
 			}
 		}
-		if err := lookupDNSRecords(context.Background(), testID, subdomain, qtype, &answers); err != nil {
-			log.Printf("error looking up DNS records: %s", err)
-		}
-		if err := recordDNSRequest(context.Background(), testID, w.RemoteAddr(), req); err != nil {
-			log.Printf("error recording DNS request: %s", err)
+		if isRunning, err := isRunningTest(context.Background(), testID); err != nil {
+			log.Printf("error checking if %x is a running test: %s", testID, err)
+		} else if isRunning {
+			if err := lookupDNSRecords(context.Background(), testID, subdomain, qtype, &answers); err != nil {
+				log.Printf("error looking up DNS records: %s", err)
+			}
+			if err := recordDNSRequest(context.Background(), testID, w.RemoteAddr(), req); err != nil {
+				log.Printf("error recording DNS request: %s", err)
+			}
 		}
 	}
 
@@ -149,12 +153,6 @@ func lookupDNSRecords(ctx context.Context, testID testID, subdomain string, qtyp
 }
 
 func recordDNSRequest(ctx context.Context, testID testID, remoteAddr net.Addr, req *dns.Msg) error {
-	if ok, err := isRunningTest(ctx, testID); err != nil {
-		return fmt.Errorf("error checking if %x is a running test: %w", testID, err)
-	} else if !ok {
-		return nil
-	}
-
 	addrPort, err := netip.ParseAddrPort(remoteAddr.String())
 	if err != nil {
 		return fmt.Errorf("error parsing DNS remote address: %w", err)
