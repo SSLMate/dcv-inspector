@@ -153,6 +153,7 @@ func main() {
 	go cleanupTestsPeriodically()
 	go refreshPrefixesPeriodically()
 	go refreshASNamesPeriodically()
+	go refreshGooglePublicDNSPeriodically()
 
 	for _, l := range httpListeners {
 		l := l
