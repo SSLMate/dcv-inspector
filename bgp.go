@@ -184,7 +184,7 @@ func downloadPrefixes(ctx context.Context) (*uint32_tree.TreeV4, *uint32_tree.Tr
 	v6prefixes := uint32_tree.NewTreeV6()
 	for {
 		var record struct {
-			CIDR string
+			CIDR netip.Prefix
 			ASN  uint32
 		}
 		if err := decoder.Decode(&record); err == io.EOF {
@@ -192,15 +192,11 @@ func downloadPrefixes(ctx context.Context) (*uint32_tree.TreeV4, *uint32_tree.Tr
 		} else if err != nil {
 			return nil, nil, fmt.Errorf("error decoding JSON from %s: %w", req.URL, err)
 		}
-		prefix, err := netip.ParsePrefix(record.CIDR)
-		if err != nil {
-			return nil, nil, fmt.Errorf("error parsing prefix from %s: %w", req.URL, err)
-		}
-		if prefix.Addr().Is4() {
-			addr := patricia.NewIPv4AddressFromBytes(prefix.Addr().AsSlice(), uint(prefix.Bits()))
+		if record.CIDR.Addr().Is4() {
+			addr := patricia.NewIPv4AddressFromBytes(record.CIDR.Addr().AsSlice(), uint(record.CIDR.Bits()))
 			v4prefixes.Add(addr, record.ASN, nil)
-		} else if prefix.Addr().Is6() {
-			addr := patricia.NewIPv6Address(prefix.Addr().AsSlice(), uint(prefix.Bits()))
+		} else if record.CIDR.Addr().Is6() {
+			addr := patricia.NewIPv6Address(record.CIDR.Addr().AsSlice(), uint(record.CIDR.Bits()))
 			v6prefixes.Add(addr, record.ASN, nil)
 		}
 	}
