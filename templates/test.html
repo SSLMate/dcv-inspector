@@ -161,7 +161,12 @@
 				{{ range .DNS }}
 					<tr>
 						<td>{{ .ReceivedAt.Format "2006-01-02 15:04:05 UTC" }}</td>
-						<td><a href="https://bgp.tools/search?q={{ .RemoteIP }}">{{ .RemoteAddr }}</a></td>
+						<td>
+							<a href="https://bgp.tools/search?q={{ .RemoteIP }}">{{ .RemoteAddr }}</a>
+							{{ if .DelegatedThirdParty }}
+								<span class="dtp"><a href="{{ .DelegatedThirdParty.URL }}">{{ .DelegatedThirdParty.Name }}</a></span>
+							{{ end }}
+						</td>
 						<td><ul>{{ range .AutonomousSystems }}<li>{{ .HTML }}</li>{{ end }}</ul></td>
 						<td>{{ .QTypeString }}</td>
 						<td>{{ .FQDN }}</td>

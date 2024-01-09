@@ -46,23 +46,30 @@ var dtpData struct {
 	googlePublicDNS *cidrSet
 }
 
-func getDelegatedThirdParty(addrString string) string {
+type delegatedThirdParty struct {
+	Name string
+	URL  string
+}
+
+var googlePublicDNS = delegatedThirdParty{Name: "Google Public DNS", URL: "https://developers.google.com/speed/public-dns/faq#locations"}
+
+func getDNSDelegatedThirdParty(addrString string) *delegatedThirdParty {
 	if addr, err := netip.ParseAddr(addrString); err == nil {
-		return getDelegatedThirdPartyForAddress(addr)
+		return getDNSDelegatedThirdPartyForAddress(addr)
 	} else {
-		return ""
+		return nil
 	}
 }
 
-func getDelegatedThirdPartyForAddress(addr netip.Addr) string {
+func getDNSDelegatedThirdPartyForAddress(addr netip.Addr) *delegatedThirdParty {
 	dtpData.mu.Lock()
 	defer dtpData.mu.Unlock()
 
 	switch {
 	case dtpData.googlePublicDNS.Has(addr):
-		return "Google Public DNS"
+		return &googlePublicDNS
 	default:
-		return ""
+		return nil
 	}
 }
 

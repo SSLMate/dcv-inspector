@@ -97,6 +97,8 @@ type dnsItem struct {
 	Bytes        []byte    `sql:"bytes"`
 }
 
+func (i *dnsItem) DelegatedThirdParty() *delegatedThirdParty { return getDNSDelegatedThirdParty(i.RemoteIP) }
+
 func (i *dnsItem) AutonomousSystems() []autonomousSystem { return getAutonomousSystems(i.RemoteIP) }
 
 func (i *dnsItem) RemoteAddr() string { return net.JoinHostPort(i.RemoteIP, i.RemotePort) }
