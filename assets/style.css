@@ -87,9 +87,6 @@ footer {
 .big_button:hover {
 	opacity: 0.8;
 }
-.big_button:focus {
-	outline: none;
-}
 .start_button {
 	background-color: #4caf50;
 	color: white;
