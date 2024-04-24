@@ -95,7 +95,7 @@ func serveDNS(w dns.ResponseWriter, req *dns.Msg) {
 			}
 		}
 		if isRunning, err := isRunningTest(context.Background(), testID); err != nil {
-			log.Printf("error checking if %x is a running test: %s", testID, err)
+			log.Printf("error checking if %v is a running test: %s", testID, err)
 		} else if isRunning {
 			if err := lookupDNSRecords(context.Background(), testID, subdomain, qtype, &answers); err != nil {
 				log.Printf("error looking up DNS records: %s", err)

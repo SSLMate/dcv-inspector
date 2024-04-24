@@ -101,9 +101,9 @@ func serveTestHTTP(ctx context.Context, testID testID, subdomain string, w http.
 	}
 
 	if ok, err := isRunningTest(ctx, testID); err != nil {
-		return fmt.Errorf("serveTestHTTP: error checking if %x is a running test: %w", testID, err)
+		return fmt.Errorf("serveTestHTTP: error checking if %v is a running test: %w", testID, err)
 	} else if !ok {
-		http.Error(w, fmt.Sprintf("%x is not a running test", testID), 404)
+		http.Error(w, fmt.Sprintf("%v is not a running test", testID), 404)
 		return nil
 	}
 
@@ -113,7 +113,7 @@ func serveTestHTTP(ctx context.Context, testID testID, subdomain string, w http.
 	}
 
 	if _, err := db.ExecContext(ctx, `INSERT INTO http_request (test_id, remote_ip, remote_port, host, method, url, proto, header_json, https) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, testID[:], remoteAddr.Addr().String(), remoteAddr.Port(), r.Host, r.Method, r.URL.String(), r.Proto, dbutil.JSON(r.Header), r.TLS != nil); err != nil {
-		return fmt.Errorf("serveTestHTTP: error inserting http_request for test %x: %w", testID, err)
+		return fmt.Errorf("serveTestHTTP: error inserting http_request for test %v: %w", testID, err)
 	}
 
 	w.Header().Set("Content-Type", "application/octet-stream")

@@ -325,10 +325,10 @@ func decodePostedDNSRecord(r *http.Request) (string, uint16, map[string]any, err
 func serveTest(ctx context.Context, w http.ResponseWriter, r *http.Request, testID testID) error {
 	dashboard, err := loadTestDashboard(ctx, testID)
 	if err != nil {
-		return fmt.Errorf("error loading dashboard for test %x: %w", testID, err)
+		return fmt.Errorf("error loading dashboard for test %v: %w", testID, err)
 	}
 	if dashboard == nil {
-		http.Error(w, fmt.Sprintf("test %x not found", testID), 404)
+		http.Error(w, fmt.Sprintf("test %v not found", testID), 404)
 		return nil
 	}
 	if dashboard.IsRunning() && r.Method == http.MethodPost {
