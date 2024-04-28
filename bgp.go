@@ -118,7 +118,6 @@ func downloadASNames(ctx context.Context) (map[uint32]string, error) {
 		return nil, fmt.Errorf("%s response from %s: %s", resp.Status, req.URL, string(respBytes))
 	}
 	reader := csv.NewReader(resp.Body)
-	reader.FieldsPerRecord = 3
 	reader.ReuseRecord = true
 
 	if _, err := reader.Read(); err != nil {
@@ -132,6 +131,9 @@ func downloadASNames(ctx context.Context) (map[uint32]string, error) {
 		}
 		if err != nil {
 			return nil, fmt.Errorf("error reading CSV response from %s: %w", req.URL, err)
+		}
+		if minFields := 3; len(record) < minFields {
+			return nil, fmt.Errorf("error reading CSV response from %s: expected at least %d fields but got %d instead", req.URL, minFields, len(record))
 		}
 		asn, err := strconv.ParseUint(strings.TrimPrefix(record[0], "AS"), 10, 32)
 		if err != nil {
