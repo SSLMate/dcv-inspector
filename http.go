@@ -40,6 +40,19 @@ import (
 	"src.agwa.name/go-dbutil"
 )
 
+func isHTTPLogNoise(message string) bool {
+	return strings.HasPrefix(message, "http: TLS handshake error")
+}
+
+type httpServerLogWriter struct{}
+
+func (httpServerLogWriter) Write(p []byte) (int, error) {
+	if message := string(p); !isHTTPLogNoise(message) {
+		log.Print(message)
+	}
+	return len(p), nil
+}
+
 func getHTTPSConfig(hello *tls.ClientHelloInfo) (*tls.Config, error) {
 	if hello.ServerName == domain {
 		return &tls.Config{
@@ -129,7 +142,7 @@ func runHTTPServer(l net.Listener) {
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  3 * time.Second,
 		Handler:      http.HandlerFunc(serveHTTP),
-		//ErrorLog:     logfilter.New(log.Default(), logfilter.HTTPServerErrors),
+		ErrorLog:     log.New(httpServerLogWriter{}, "", 0),
 	}
 	log.Fatal(server.Serve(l))
 }
