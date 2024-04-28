@@ -135,6 +135,9 @@ func downloadASNames(ctx context.Context) (map[uint32]string, error) {
 		if minFields := 3; len(record) < minFields {
 			return nil, fmt.Errorf("error reading CSV response from %s: expected at least %d fields but got %d instead", req.URL, minFields, len(record))
 		}
+		if record[0] == "AS-1" {
+			continue
+		}
 		asn, err := strconv.ParseUint(strings.TrimPrefix(record[0], "AS"), 10, 32)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing ASN in CSV from %s: %w", req.URL, err)
