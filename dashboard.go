@@ -32,7 +32,6 @@ import (
 	"embed"
 	"encoding/base64"
 	"fmt"
-	"github.com/mattn/go-sqlite3"
 	"html/template"
 	"net"
 	"net/http"
@@ -369,11 +368,10 @@ func serveTest(ctx context.Context, w http.ResponseWriter, r *http.Request, test
 				http.Error(w, "Content must not be longer than 512 bytes", 400)
 				return nil
 			}
-			if _, err := db.ExecContext(ctx, `INSERT INTO http_file (test_id, scheme, subdomain, path, content) VALUES(?,?,?,?,?)`, testID[:], scheme, subdomain, path, content); err != nil {
-				if isUniqueViolation(err) {
-					http.Error(w, "There is already a file at this subdomain and path", 400)
-					return nil
-				}
+			if err := dbutil.MustAffectRow(db.ExecContext(ctx, `INSERT INTO http_file (test_id, scheme, subdomain, path, content) VALUES(?,?,?,?,?) ON CONFLICT (test_id, scheme, subdomain, path) DO NOTHING`, testID[:], scheme, subdomain, path, content)); err == sql.ErrNoRows {
+				http.Error(w, "There is already a file at this subdomain and path", 400)
+				return nil
+			} else if err != nil {
 				return fmt.Errorf("serveTest: error inserting http_file: %w", err)
 			}
 		}
@@ -410,11 +408,6 @@ func boolString(v bool) string {
 	} else {
 		return "No"
 	}
-}
-
-func isUniqueViolation(err error) bool {
-	sqliteErr, ok := err.(sqlite3.Error)
-	return ok && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique
 }
 
 func serveViewIssuance(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
