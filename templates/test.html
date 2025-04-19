@@ -59,7 +59,7 @@
 	<section>
 		<h2>DNS Records</h2>
 		<table>
-			<thead><tr><th>Subdomain</th><th>Type</th><th>Data</th>{{ if $.IsRunning }}<th></th>{{ end }}</tr></thead>
+			<thead><tr><th>Subdomain (optional)</th><th>Type</th><th>Data</th>{{ if $.IsRunning }}<th></th>{{ end }}</tr></thead>
 			<tbody>
 			{{ range $.DNSRecords }}
 				<tr>
@@ -112,7 +112,7 @@
 	<section>
 		<h2>HTTP Files</h2>
 		<table>
-			<thead><tr><th>Scheme</th><th>Subdomain</th><th>Path</th><th>Content</th>{{ if $.IsRunning }}<th></th>{{ end }}</tr></thead>
+			<thead><tr><th>Scheme</th><th>Subdomain (optional)</th><th>Path</th><th>Content</th>{{ if $.IsRunning }}<th></th>{{ end }}</tr></thead>
 			<tbody>
 			{{ range $.HTTPFiles }}
 				<tr>
