@@ -150,6 +150,10 @@ func main() {
 		log.Fatalf("error opening DNS UDP sockets: %s", err)
 	}
 
+	if len(httpsListeners) == 0 {
+		redirectDashboardToHTTPS = false
+	}
+
 	go cleanupTestsPeriodically()
 	go refreshPrefixesPeriodically()
 	go refreshASNamesPeriodically()

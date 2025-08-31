@@ -45,7 +45,7 @@ import (
 	"src.agwa.name/go-dbutil"
 )
 
-const redirectDashboardToHTTPS = true
+var redirectDashboardToHTTPS = true
 
 //go:embed assets/* templates/*
 var content embed.FS
