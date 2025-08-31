@@ -330,6 +330,20 @@ func serveTest(ctx context.Context, w http.ResponseWriter, r *http.Request, test
 		http.Error(w, fmt.Sprintf("test %v not found", testID), 404)
 		return nil
 	}
+
+	// Filtering logic for well-known requests
+	filterWellKnown := false
+	if r.URL.Query().Get("http_requests") == "dcv_only" {
+		filterWellKnown = true
+		filtered := dashboard.HTTP[:0]
+		for _, item := range dashboard.HTTP {
+			urlLower := strings.ToLower(item.URL)
+			if strings.HasPrefix(urlLower, "/.well-known/pki-validation") || strings.HasPrefix(urlLower, "/.well-known/acme-challenge") {
+				filtered = append(filtered, item)
+			}
+		}
+		dashboard.HTTP = filtered
+	}
 	if dashboard.IsRunning() && r.Method == http.MethodPost {
 		if r.PostFormValue("stop") != "" {
 			if _, err := db.ExecContext(ctx, `UPDATE test SET stopped_at = CURRENT_TIMESTAMP WHERE test_id = ? AND stopped_at IS NULL`, testID[:]); err != nil {
@@ -398,7 +412,12 @@ func serveTest(ctx context.Context, w http.ResponseWriter, r *http.Request, test
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("X-Xss-Protection", "0")
 	w.WriteHeader(http.StatusOK)
-	testTemplate.Execute(w, dashboard)
+	// Pass FilterWellKnown to template
+	type dashboardWithFilter struct {
+		*testDashboard
+		FilterWellKnown bool
+	}
+	testTemplate.Execute(w, dashboardWithFilter{dashboard, filterWellKnown})
 	return nil
 }
 

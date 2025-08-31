@@ -184,6 +184,23 @@
 		</section>
 		<section>
 			<h2>HTTP Requests</h2>
+			<form id="wellKnownFilterForm" style="margin-bottom:1em">
+				<label>
+					<input type="checkbox" id="wellKnownFilterCheckbox" name="filter_well_known" value="true" {{ if .FilterWellKnown }}checked{{ end }}>
+					Show only well-known validation requests
+				</label>
+			</form>
+			<script>
+			document.getElementById('wellKnownFilterCheckbox').addEventListener('change', function() {
+				const url = new URL(window.location.href);
+				if (this.checked) {
+					url.searchParams.set('http_requests', 'dcv_only');
+				} else {
+					url.searchParams.delete('http_requests');
+				}
+				window.location.href = url.toString();
+			});
+			</script>
 			<table>
 				<thead><tr><th>Time</th><th>Remote Address</th><th>Autonomous System</th><th>Host</th><th>HTTPS</th><th>Request</th><th>Header</th></tr></thead>
 				<tbody>
