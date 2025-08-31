@@ -133,3 +133,6 @@ ul, li {
 .dtp > a {
 	color: inherit;
 }
+#http_requests_table.dcv_filtered > tbody > tr[data-isdcv="false"] {
+	display: none;
+}
