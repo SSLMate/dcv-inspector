@@ -130,7 +130,7 @@ func lookupDNSRecords(ctx context.Context, testID testID, subdomain string, qtyp
 			return fmt.Errorf("error querying dns_record row: %w", err)
 		}
 	} else {
-		if err := dbutil.QueryAll(ctx, db, &rows, `SELECT type, data_json FROM dns_record WHERE test_id = ? AND subdomain = ? AND type = ? ORDER BY dns_record_id`, testID[:], subdomain, qtype); err != nil {
+		if err := dbutil.QueryAll(ctx, db, &rows, `SELECT type, data_json FROM dns_record WHERE test_id = ? AND subdomain = ? AND (type = ? OR type = ?) ORDER BY dns_record_id`, testID[:], subdomain, qtype, dns.TypeCNAME); err != nil {
 			return fmt.Errorf("error querying dns_record row: %w", err)
 		}
 	}
@@ -146,6 +146,10 @@ func lookupDNSRecords(ctx context.Context, testID testID, subdomain string, qtyp
 		rr.Header().Ttl = 15
 		if err := json.Unmarshal([]byte(row.DataJSON), &rr); err != nil {
 			return fmt.Errorf("dns_record row contains bad JSON in the data column: %w", err)
+		}
+		if row.Type == dns.TypeCNAME {
+			*rrs = []dns.RR{rr}
+			break
 		}
 		*rrs = append(*rrs, rr)
 	}

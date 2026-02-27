@@ -47,6 +47,21 @@ import (
 
 var redirectDashboardToHTTPS = true
 
+var authorizedCNAMETargetDomains = []string{
+	// Sectigo
+	"sectigo.com.",
+	"comodoca.com.",
+
+	// SSL.com (https://www.ssl.com/faqs/ssl-dv-validation-requirements/#cname)
+	"ssl.com.",
+
+	// DigiCert (https://docs.digicert.com/en/certcentral/manage-certificates/dv-certificate-enrollment/domain-control-validation--dcv--methods/use-the-dns-cname-dcv-method.html)
+	"dcv.digicert.com.",
+
+	// Amazon Trust Services (https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html)
+	"acm-validations.aws.",
+}
+
 //go:embed assets/* templates/*
 var content embed.FS
 
@@ -300,6 +315,25 @@ func validateCAATag(tag string) error {
 	return nil
 }
 
+func normalizeAndValidateCNAMETarget(target string) (string, error) {
+	target = strings.ToLower(strings.TrimSpace(target))
+	if target == "" {
+		return "", fmt.Errorf("target cannot be empty")
+	}
+	if !strings.HasSuffix(target, ".") {
+		target += "."
+	}
+	if _, ok := dns.IsDomainName(target); !ok {
+		return "", fmt.Errorf("target is not a valid domain name")
+	}
+	for _, authorizedDomain := range authorizedCNAMETargetDomains {
+		if dns.IsSubDomain(authorizedDomain, target) {
+			return target, nil
+		}
+	}
+	return "", fmt.Errorf("target is not beneath a domain name known to be used by CAs for CNAME targets (please open an issue on GitHub if we're missing a CA domain)")
+}
+
 func decodePostedDNSRecord(r *http.Request) (string, uint16, map[string]any, error) {
 	switch r.PostFormValue("add_dns_record") {
 	case "TXT":
@@ -321,6 +355,13 @@ func decodePostedDNSRecord(r *http.Request) (string, uint16, map[string]any, err
 		}
 		value := r.PostFormValue("caa_value")
 		return subdomain, dns.TypeCAA, map[string]any{"Flag": flag, "Tag": tag, "Value": value}, nil
+	case "CNAME":
+		subdomain := strings.ToLower(r.PostFormValue("cname_subdomain"))
+		target, err := normalizeAndValidateCNAMETarget(r.PostFormValue("cname_target"))
+		if err != nil {
+			return "", 0, nil, fmt.Errorf("invalid CNAME target: %w", err)
+		}
+		return subdomain, dns.TypeCNAME, map[string]any{"Target": target}, nil
 	default:
 		return "", 0, nil, fmt.Errorf("invalid record type")
 	}

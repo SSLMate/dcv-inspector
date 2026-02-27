@@ -68,6 +68,7 @@
 					<td>
 						{{ if eq .TypeString "TXT" }}"{{ index .Data "Txt" 0 }}"{{ end }}
 						{{ if eq .TypeString "CAA" }}{{ index .Data "Flag" }} {{ index .Data "Tag" }} "{{ index .Data "Value" }}"{{ end }}
+						{{ if eq .TypeString "CNAME" }}{{ index .Data "Target" }}{{ end }}
 					</td>
 					{{ if $.IsRunning }}
 						<td>
@@ -102,6 +103,17 @@
 						<form id="add_caa_record_form" action="/test/{{ $.TestID }}" method="post">
 							<input type="hidden" name="add_dns_record" value="CAA"/>
 							<button type="submit">Add CAA Record</button>
+						</form>
+					</td>
+				</tr>
+				<tr>
+					<td><input form="add_cname_record_form" type="text" name="cname_subdomain" size="40" required="required"/></td>
+					<td>CNAME</td>
+					<td><input form="add_cname_record_form" type="text" name="cname_target" size="50" required="required"/></td>
+					<td>
+						<form id="add_cname_record_form" action="/test/{{ $.TestID }}" method="post">
+							<input type="hidden" name="add_dns_record" value="CNAME"/>
+							<button type="submit">Add CNAME Record</button>
 						</form>
 					</td>
 				</tr>
