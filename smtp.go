@@ -93,7 +93,12 @@ func (s *smtpSession) Data(r io.Reader) error {
 	}
 	helo := s.conn.Hostname()
 	_, starttls := s.conn.TLSConnectionState()
+	seen := make(map[testID]bool)
 	for _, testID := range s.testIDs {
+		if seen[testID] {
+			continue
+		}
+		seen[testID] = true
 		if err := recordSMTPRequest(context.Background(), testID, addrPort, helo, starttls, s.mailFrom, s.rcptTo, data); err != nil {
 			log.Printf("smtp: error recording request for test %v: %s", testID, err)
 		}

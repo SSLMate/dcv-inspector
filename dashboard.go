@@ -406,6 +406,10 @@ func serveTest(ctx context.Context, w http.ResponseWriter, r *http.Request, test
 				content   = r.PostFormValue("file_content")
 			)
 			subdomain = strings.ToLower(subdomain)
+			if scheme != "http" && scheme != "https" {
+				http.Error(w, "Scheme must be http or https", 400)
+				return nil
+			}
 			if !strings.HasPrefix(path, "/.well-known/pki-validation/") && !strings.HasPrefix(path, "/.well-known/acme-challenge/") {
 				http.Error(w, "Path must start with /.well-known/pki-validation/ or /.well-known/acme-challenge/", 400)
 				return nil

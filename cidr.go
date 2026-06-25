@@ -44,6 +44,9 @@ func newCidrSet() *cidrSet {
 }
 
 func (s *cidrSet) Has(addr netip.Addr) bool {
+	if s == nil {
+		return false
+	}
 	found := false
 	if addr.Is4() {
 		found, _ = s.v4.FindDeepestTag(patricia.NewIPv4AddressFromBytes(addr.AsSlice(), 32))

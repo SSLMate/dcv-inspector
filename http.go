@@ -73,9 +73,9 @@ func getHTTPSConfig(hello *tls.ClientHelloInfo) (*tls.Config, error) {
 
 func getHTTPHost(r *http.Request) string {
 	if host, _, err := net.SplitHostPort(r.Host); err == nil {
-		return host
+		return strings.ToLower(host)
 	} else {
-		return r.Host
+		return strings.ToLower(r.Host)
 	}
 }
 
