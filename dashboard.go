@@ -359,7 +359,7 @@ func decodePostedDNSRecord(r *http.Request) (string, uint16, map[string]any, err
 		subdomain := strings.ToLower(r.PostFormValue("cname_subdomain"))
 		target, err := normalizeAndValidateCNAMETarget(r.PostFormValue("cname_target"))
 		if err != nil {
-			return "", 0, nil, fmt.Errorf("invalid CNAME target: %w", err)
+			return "", 0, nil, fmt.Errorf("invalid CNAME target %q: %w", target, err)
 		}
 		return subdomain, dns.TypeCNAME, map[string]any{"Target": target}, nil
 	default:
