@@ -130,7 +130,6 @@ func runSMTPServer(l net.Listener) {
 	server.ReadTimeout = 5 * time.Second
 	server.WriteTimeout = 15 * time.Second
 	server.EnableSMTPUTF8 = true
-	server.AuthDisabled = true
 	log.Fatal(server.Serve(l))
 }
 
