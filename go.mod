@@ -19,3 +19,5 @@ require (
 	golang.org/x/sys v0.50.0 // indirect
 	golang.org/x/text v0.44.0 // indirect
 )
+
+retract v0.3.1 // Fails to build from source.
